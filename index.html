@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZATO-AeroGuard | AI-Powered Aviation Asset Transition Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   RESET & ROOT   ZATO-AeroGuard   deep-navy / amber-gold palette
+============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:auto;}
+
+:root{
+  --gold:#C8922A;
+  --gold-light:#E5AE48;
+  --gold-dark:#9B6B17;
+  --deep:#07090F;
+  --deep-mid:#0C1020;
+  --steel:#1C2438;
+  --slate:#253047;
+  --amber:#D4882A;
+  --amber-pale:#F5C56A;
+  --white:#FFFFFF;
+  --off-white:#F5F3EE;
+  --text-dark:#0C1020;
+  --text-muted:#2E3A56;
+  --card-bg:rgba(200,146,42,0.05);
+  --card-border:rgba(200,146,42,0.18);
+  --blue-accent:#1E6FA8;
+  --blue-dim:#164F7A;
+
+  /* Advanced animation vars */
+  --mouse-x:50%;
+  --mouse-y:50%;
+  --tilt-x:0deg;
+  --tilt-y:0deg;
+  --scroll-progress:0;
+}
+
+html{font-family:'Source Sans 3',sans-serif;}
+
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:#07090F;}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px;}
+
+/* ── MAGNETIC CURSOR ── */
+#cursor-ring{
+  position:fixed;width:36px;height:36px;border:1.5px solid rgba(200,146,42,0.6);
+  border-radius:50%;pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);transition:transform 0.08s ease,width 0.25s,height 0.25s,border-color 0.25s,opacity 0.25s;
+  mix-blend-mode:normal;
+}
+#cursor-dot{
+  position:fixed;width:6px;height:6px;background:var(--gold);
+  border-radius:50%;pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);transition:transform 0.04s ease;
+}
+body:hover #cursor-ring{opacity:1;}
+.cursor-hover #cursor-ring{width:56px;height:56px;border-color:var(--gold-light);background:rgba(200,146,42,0.06);}
+
+/* ============================================================
+   NAVBAR
+============================================================ */
+.navbar{
+  width:100%;background:rgba(7,9,15,0.97);
+  padding:14px 8%;position:fixed;top:0;left:0;
+  z-index:1000;border-bottom:1px solid rgba(200,146,42,0.18);
+  backdrop-filter:blur(12px);
+  transition:background 0.4s,border-color 0.4s,padding 0.4s;
+}
+.navbar.scrolled{
+  padding:10px 8%;
+  background:rgba(7,9,15,0.99);
+  border-bottom-color:rgba(200,146,42,0.32);
+  box-shadow:0 4px 30px rgba(0,0,0,0.5);
+}
+.nav-container{
+  max-width:1200px;margin:auto;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo{
+  font-family:'Playfair Display',serif;font-size:22px;font-weight:700;
+  color:var(--gold);letter-spacing:1px;
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+}
+.logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.logo-icon::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);
+}
+.logo-icon svg{width:24px;height:24px;position:relative;z-index:1;}
+.logo span{color:var(--white);font-weight:400;}
+
+#navMenu{display:flex;gap:32px;align-items:center;}
+#navMenu a{
+  text-decoration:none;color:rgba(200,146,42,0.8);
+  font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  position:relative;transition:color 0.3s;font-family:'IBM Plex Mono',monospace;
+}
+#navMenu a::after{
+  content:"";position:absolute;left:0;bottom:-4px;
+  width:0;height:1px;background:var(--gold);transition:0.3s;
+}
+#navMenu a:hover{color:var(--gold);}
+#navMenu a:hover::after{width:100%;}
+
+/* ── UTC Clock ── */
+#utc-clock{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;
+  color:rgba(200,146,42,0.55);letter-spacing:1px;
+  border:1px solid rgba(200,146,42,0.2);padding:4px 10px;border-radius:3px;
+  white-space:nowrap;
+}
+
+.menu-toggle{display:none;flex-direction:column;gap:5px;cursor:pointer;}
+.menu-toggle span{width:24px;height:2px;background:var(--gold);display:block;transition:0.4s cubic-bezier(0.23,1,0.32,1);}
+
+@media(max-width:900px){
+  #navMenu{
+    position:absolute;top:64px;left:0;width:100%;
+    background:rgba(7,9,15,0.98);flex-direction:column;padding:28px 0;gap:20px;display:none;
+    border-bottom:1px solid rgba(200,146,42,0.18);
+  }
+  #navMenu.active{display:flex;}
+  .menu-toggle{display:flex;}
+  #utc-clock{display:none;}
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero-section{
+  position:relative;padding:150px 8% 100px;background:var(--deep);
+  overflow:hidden;min-height:100vh;display:flex;align-items:center;
+}
+
+/* Parallax layers */
+.hero-parallax-layer{
+  position:absolute;inset:0;pointer-events:none;will-change:transform;
+}
+.hero-section::before{
+  content:"";position:absolute;top:0;right:0;width:320px;height:320px;
+  background:var(--gold);opacity:0.07;clip-path:polygon(100% 0,0 0,100% 100%);
+  pointer-events:none;
+}
+.hero-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:300px;height:300px;
+  background:var(--blue-accent);opacity:0.05;clip-path:polygon(0 100%,0 0,100% 100%);
+  pointer-events:none;
+}
+.hero-glow{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:900px;height:900px;
+  background:radial-gradient(circle,rgba(200,146,42,0.07) 0%,transparent 65%);
+  pointer-events:none;animation:glow-pulse 4s ease-in-out infinite;
+}
+@keyframes glow-pulse{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1);}50%{opacity:0.7;transform:translate(-50%,-50%) scale(1.06);}}
+
+.hero-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(200,146,42,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(200,146,42,0.04) 1px,transparent 1px);
+  background-size:60px 60px;pointer-events:none;
+}
+/* grid-drift animation removed */
+
+/* Floating orbs */
+.orb{position:absolute;border-radius:50%;pointer-events:none;animation:float-orb 8s ease-in-out infinite;}
+.orb-1{width:240px;height:240px;top:15%;right:6%;
+  background:radial-gradient(circle,rgba(200,146,42,0.14) 0%,transparent 70%);animation-delay:0s;}
+.orb-2{width:160px;height:160px;bottom:20%;left:4%;
+  background:radial-gradient(circle,rgba(30,111,168,0.12) 0%,transparent 70%);animation-delay:3s;}
+.orb-3{width:110px;height:110px;top:45%;left:38%;
+  background:radial-gradient(circle,rgba(200,146,42,0.08) 0%,transparent 70%);animation-delay:5s;}
+@keyframes float-orb{0%,100%{transform:translateY(0px) rotate(0deg);}50%{transform:translateY(-28px) rotate(6deg);}}
+
+/* ── SVG AIRCRAFT FLIGHT PATH ── */
+#flight-svg{
+  position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.35;
+}
+.flight-path-line{
+  fill:none;stroke:rgba(200,146,42,0.3);stroke-width:1;
+  stroke-dasharray:6 10;stroke-dashoffset:0;
+  animation:dash-move 8s linear infinite;
+}
+@keyframes dash-move{to{stroke-dashoffset:-200;}}
+#aircraft-icon{
+  animation:fly-path 12s linear infinite;
+}
+@keyframes fly-path{
+  0%{offset-distance:0%;}
+  100%{offset-distance:100%;}
+}
+
+.hero-container{
+  max-width:1200px;margin:auto;
+  display:grid;grid-template-columns:1.1fr 0.9fr;
+  gap:70px;align-items:center;position:relative;z-index:2;width:100%;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(200,146,42,0.08);border:1px solid rgba(200,146,42,0.3);
+  color:var(--gold);font-size:11px;font-weight:700;letter-spacing:3px;
+  padding:6px 16px;border-radius:3px;text-transform:uppercase;
+  margin-bottom:20px;font-family:'IBM Plex Mono',monospace;
+  animation:badge-in 1s cubic-bezier(0.23,1,0.32,1) both;
+}
+@keyframes badge-in{from{opacity:0;transform:translateY(-12px);}to{opacity:1;transform:translateY(0);}}
+.hero-badge::before{
+  content:"";width:6px;height:6px;border-radius:50%;background:var(--gold-light);
+  animation:pulse-dot 1.5s ease-in-out infinite;
+}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.6);}}
+
+.hero-left h1{
+  font-family:'Playfair Display',serif;font-size:54px;line-height:1.12;
+  color:var(--gold);margin-bottom:8px;letter-spacing:1px;
+  animation:h1-in 1s 0.2s cubic-bezier(0.23,1,0.32,1) both;
+}
+@keyframes h1-in{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+.hero-left h1 span{color:var(--white);}
+.hero-divider{
+  width:70px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);
+  margin:18px 0 24px;animation:divider-in 1s 0.4s cubic-bezier(0.23,1,0.32,1) both;
+}
+@keyframes divider-in{from{width:0;}to{width:70px;}}
+.hero-text{color:#8B9CC4;font-size:17px;line-height:1.85;margin-bottom:35px;max-width:520px;
+  animation:text-in 1s 0.5s cubic-bezier(0.23,1,0.32,1) both;
+}
+@keyframes text-in{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.hero-buttons{display:flex;gap:16px;flex-wrap:wrap;animation:btn-in 1s 0.7s cubic-bezier(0.23,1,0.32,1) both;}
+@keyframes btn-in{from{opacity:0;}to{opacity:1;}}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--white);padding:14px 32px;border-radius:4px;
+  text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+  transition:all 0.3s cubic-bezier(0.23,1,0.32,1);box-shadow:0 4px 20px rgba(200,146,42,0.35);
+  font-family:'IBM Plex Mono',monospace;position:relative;overflow:hidden;
+}
+.btn-gold::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 60%);
+  opacity:0;transition:opacity 0.3s;
+}
+.btn-gold:hover::before{opacity:1;}
+.btn-gold:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(200,146,42,0.55);}
+.btn-gold:active{transform:translateY(0);}
+.btn-outline-gold{
+  border:1px solid var(--gold);color:var(--gold);padding:14px 32px;border-radius:4px;
+  text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+  transition:all 0.3s cubic-bezier(0.23,1,0.32,1);font-family:'IBM Plex Mono',monospace;
+  position:relative;overflow:hidden;
+}
+.btn-outline-gold::before{
+  content:"";position:absolute;inset:0;background:var(--gold);
+  transform:translateX(-101%);transition:transform 0.35s cubic-bezier(0.23,1,0.32,1);z-index:-1;
+}
+.btn-outline-gold:hover::before{transform:translateX(0);}
+.btn-outline-gold:hover{color:var(--deep);}
+
+/* ── HERO CARD  3D TILT ── */
+.hero-right{position:relative;animation:card-in 1s 0.6s cubic-bezier(0.23,1,0.32,1) both;}
+@keyframes card-in{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+.hero-card{
+  background:rgba(200,146,42,0.05);border:1px solid rgba(200,146,42,0.2);
+  border-radius:12px;padding:35px;backdrop-filter:blur(8px);position:relative;overflow:hidden;
+  transform-style:preserve-3d;transition:box-shadow 0.3s;
+  will-change:transform;
+}
+.hero-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;
+  height:2px;background:linear-gradient(90deg,var(--gold),var(--blue-accent));
+}
+/* Sheen sweep on card */
+.hero-card::after{
+  content:"";position:absolute;top:-50%;left:-75%;
+  width:50%;height:200%;
+  background:linear-gradient(100deg,transparent 20%,rgba(200,146,42,0.08) 50%,transparent 80%);
+  transform:skewX(-20deg);animation:card-sheen 5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes card-sheen{0%,100%{left:-75%;}50%{left:130%;}}
+
+.hero-card-title{
+  font-family:'IBM Plex Mono',monospace;color:var(--gold);
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;
+}
+.hero-stat{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid rgba(200,146,42,0.08);
+  transition:background 0.25s;border-radius:4px;
+}
+.hero-stat:hover{background:rgba(200,146,42,0.04);padding-left:8px;}
+.hero-stat:last-child{border-bottom:none;}
+.stat-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex-shrink:0;
+  animation:dot-pulse 2s ease-in-out infinite;}
+.stat-dot.blue{background:var(--blue-accent);animation-delay:1s;}
+@keyframes dot-pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,146,42,0.4);}70%{box-shadow:0 0 0 6px rgba(200,146,42,0);}}
+.stat-label{color:#8B9CC4;font-size:14px;flex:1;}
+.stat-val{color:var(--gold);font-weight:700;font-size:16px;font-family:'Playfair Display',serif;letter-spacing:1px;}
+
+.typing-word{
+  display:inline-block;border-right:3px solid var(--gold);
+  animation:blink-cursor 0.8s step-end infinite;
+}
+@keyframes blink-cursor{0%,100%{border-color:var(--gold);}50%{border-color:transparent;}}
+
+@media(max-width:900px){
+  .hero-section{padding:120px 6% 80px;min-height:auto;}
+  .hero-container{grid-template-columns:1fr;gap:50px;text-align:center;}
+  .hero-left h1{font-size:32px;}
+  .hero-divider{margin:16px auto 22px;}
+  .hero-text{font-size:15px;margin:0 auto 28px;max-width:95%;}
+  .hero-buttons{justify-content:center;}
+  .btn-gold,.btn-outline-gold{padding:13px 24px;font-size:12px;}
+}
+
+/* ── RADAR PULSE (decorative below hero) ── */
+.radar-strip{
+  height:4px;background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  position:relative;overflow:hidden;
+}
+.radar-sweep{
+  position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(229,174,72,0.9),transparent);
+  animation:radar-sweep 3s linear infinite;
+}
+@keyframes radar-sweep{to{left:140%;}}
+
+/* ============================================================
+   ABOUT
+============================================================ */
+.about-section{padding:130px 8%;background:var(--deep-mid);position:relative;overflow:hidden;}
+.about-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--blue-accent);opacity:0.05;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.about-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:250px;height:250px;
+  background:var(--gold);opacity:0.04;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.about-container{
+  max-width:1100px;margin:auto;display:grid;grid-template-columns:1.3fr 1fr;
+  gap:80px;align-items:center;position:relative;z-index:2;
+}
+.section-label{
+  display:inline-block;color:var(--gold);font-size:11px;font-weight:700;
+  letter-spacing:4px;text-transform:uppercase;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;
+}
+.section-title{
+  font-family:'Playfair Display',serif;font-size:40px;color:var(--gold);
+  line-height:1.2;margin-bottom:8px;letter-spacing:1px;
+}
+.section-divider{
+  width:70px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0 26px;
+}
+.about-left p{color:#8B9CC4;line-height:1.85;margin-bottom:20px;font-size:16px;max-width:520px;}
+.about-features{margin-top:28px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.feature-tag{
+  background:rgba(200,146,42,0.07);border:1px solid rgba(200,146,42,0.2);
+  color:rgba(200,146,42,0.9);padding:10px 16px;border-radius:5px;
+  font-size:12px;font-weight:700;letter-spacing:0.5px;font-family:'IBM Plex Mono',monospace;
+  transition:all 0.3s;cursor:default;
+}
+.feature-tag:hover{background:rgba(200,146,42,0.14);border-color:rgba(200,146,42,0.4);transform:translateY(-2px);}
+.founder-box{
+  background:rgba(200,146,42,0.05);border:1px solid rgba(200,146,42,0.18);
+  padding:38px;border-radius:12px;position:relative;
+  transition:box-shadow 0.35s,border-color 0.35s;
+}
+.founder-box:hover{box-shadow:0 16px 40px rgba(0,0,0,0.5);border-color:rgba(200,146,42,0.32);}
+.founder-box::before{
+  content:'"';position:absolute;top:-20px;left:28px;
+  font-size:80px;color:var(--gold);opacity:0.1;font-family:'Playfair Display',serif;line-height:1;
+}
+.founder-box::after{
+  content:"";position:absolute;top:0;left:0;right:0;
+  height:2px;background:linear-gradient(90deg,var(--gold),var(--blue-accent));border-radius:12px 12px 0 0;
+}
+.founder-avatar{
+  width:80px;height:80px;border-radius:50%;
+  border:2px solid rgba(200,146,42,0.4);margin-bottom:16px;
+  background:linear-gradient(135deg,var(--gold-dark),var(--steel));
+  display:flex;align-items:center;justify-content:center;font-size:32px;
+  overflow:hidden;position:relative;
+}
+.founder-avatar::after{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(135deg,rgba(200,146,42,0.2) 0%,transparent 60%);
+}
+.founder-box-title{
+  font-family:'Playfair Display',serif;color:var(--gold);
+  font-size:13px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;
+}
+.founder-box-div{width:50px;height:2px;background:var(--gold);margin-bottom:18px;}
+.founder-box p{color:#8B9CC4;line-height:1.8;margin-bottom:16px;font-size:15px;}
+.founder-box p strong{color:rgba(200,146,42,0.9);}
+.contact-btn{
+  display:inline-block;padding:10px 22px;background:var(--gold);color:var(--white);
+  text-decoration:none;border-radius:4px;font-weight:700;font-size:12px;
+  letter-spacing:1px;text-transform:uppercase;margin-top:4px;transition:all 0.3s;
+  font-family:'IBM Plex Mono',monospace;position:relative;overflow:hidden;
+}
+.contact-btn::after{
+  content:"";position:absolute;inset:0;
+  background:rgba(255,255,255,0.15);transform:translateX(-101%);transition:transform 0.3s;
+}
+.contact-btn:hover::after{transform:translateX(0);}
+.contact-btn:hover{background:var(--gold-light);color:var(--deep);transform:translateY(-1px);}
+
+@media(max-width:900px){
+  .about-section{padding:90px 6%;}
+  .about-container{grid-template-columns:1fr;gap:50px;text-align:center;}
+  .section-divider{margin:14px auto 24px;}
+  .about-left p{margin:0 auto 18px;max-width:95%;}
+  .about-features{grid-template-columns:1fr;max-width:300px;margin:20px auto 0;}
+  .feature-tag{text-align:center;}
+  .founder-box{text-align:center;}
+  .founder-box-div{margin:8px auto 18px;}
+  .founder-avatar{margin:0 auto 16px;}
+}
+
+/* ============================================================
+   PROCESS
+============================================================ */
+.process-section{padding:130px 8%;background:var(--off-white);position:relative;overflow:hidden;}
+.process-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--gold);opacity:0.07;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.process-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:260px;height:260px;
+  background:var(--deep);opacity:0.06;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.process-container{max-width:1200px;margin:auto;text-align:center;position:relative;z-index:2;}
+.process-container .section-title{color:var(--text-dark);}
+.process-container .section-label{color:var(--blue-accent);}
+.process-container .section-divider{margin:14px auto 26px;background:linear-gradient(90deg,var(--gold),transparent);}
+.process-sub{max-width:660px;margin:0 auto 60px;color:#3A4268;line-height:1.8;font-size:16px;}
+.process-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px;}
+.process-card{
+  background:var(--white);padding:28px 22px;border-radius:10px;
+  border:1px solid #E2DACE;border-top:4px solid var(--gold);
+  text-align:left;transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+  box-shadow:0 4px 20px rgba(0,0,0,0.05);
+  transform:translateY(0);
+}
+.process-card:hover{
+  transform:translateY(-10px);box-shadow:0 24px 48px rgba(200,146,42,0.16);
+  border-top-color:var(--blue-accent);
+}
+.process-card-img{
+  width:100%;height:140px;
+  border-radius:7px;margin-bottom:16px;display:block;
+  background:var(--deep);overflow:hidden;position:relative;
+}
+.process-card-img-inner{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:48px;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+.process-card:hover .process-card-img-inner{transform:scale(1.12);}
+.step-badge{
+  display:inline-block;background:var(--gold);color:var(--white);
+  font-size:11px;font-weight:700;padding:5px 14px;border-radius:3px;
+  letter-spacing:1px;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;
+}
+.process-card h3{
+  font-family:'Playfair Display',serif;margin-bottom:10px;
+  color:var(--text-dark);font-size:18px;letter-spacing:0.5px;
+}
+.process-card p{color:#3A4268;font-size:14px;line-height:1.65;}
+
+/* Connector lines between process cards */
+.process-grid{position:relative;}
+.process-grid::before{
+  content:"";position:absolute;top:70px;left:calc(12.5% + 14px);
+  right:calc(12.5% + 14px);height:2px;
+  background:repeating-linear-gradient(90deg,var(--gold) 0,var(--gold) 8px,transparent 8px,transparent 16px);
+  opacity:0.25;pointer-events:none;z-index:0;
+}
+@media(max-width:1000px){
+  .process-grid{grid-template-columns:repeat(2,1fr);}
+  .process-grid::before{display:none;}
+}
+@media(max-width:600px){
+  .process-section{padding:80px 6%;}
+  .process-container .section-title{font-size:26px;}
+  .process-sub{font-size:14px;margin-bottom:40px;}
+  .process-grid{grid-template-columns:1fr;}
+}
+
+/* ============================================================
+   PLATFORM / SERVICES
+============================================================ */
+.platform-section{padding:130px 8%;background:var(--deep);position:relative;overflow:hidden;}
+.platform-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--gold);opacity:0.07;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.platform-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:260px;height:260px;
+  background:var(--blue-accent);opacity:0.05;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.platform-container{max-width:1200px;margin:auto;text-align:center;position:relative;z-index:2;}
+.platform-container .section-title{color:var(--gold);}
+.platform-container .section-label{color:var(--blue-accent);}
+.platform-container .section-divider{margin:14px auto 26px;background:linear-gradient(90deg,var(--gold),transparent);}
+.platform-sub{max-width:660px;margin:0 auto 60px;color:#8B9CC4;line-height:1.8;font-size:16px;}
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+
+/* Advanced 3D tilt platform card */
+.platform-card{
+  background:var(--card-bg);border:1px solid var(--card-border);
+  padding:30px 25px;border-radius:10px;text-align:left;
+  transition:box-shadow 0.35s,border-color 0.35s;
+  position:relative;overflow:hidden;
+  transform-style:preserve-3d;will-change:transform;
+  cursor:default;
+}
+.platform-card-shine{
+  position:absolute;inset:0;border-radius:10px;pointer-events:none;
+  background:radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),rgba(200,146,42,0.08),transparent 40%);
+  z-index:0;
+}
+.platform-card > *:not(.platform-card-shine){position:relative;z-index:1;}
+.platform-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;
+  height:2px;background:linear-gradient(90deg,var(--gold),var(--blue-accent));
+  transform:scaleX(0);transform-origin:left;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+.platform-card:hover::before{transform:scaleX(1);}
+.platform-card:hover{
+  box-shadow:0 24px 48px rgba(0,0,0,0.55);
+  border-color:rgba(200,146,42,0.38);
+}
+.platform-card-img{
+  width:100%;height:160px;border-radius:7px;margin-bottom:18px;display:block;
+  overflow:hidden;position:relative;
+}
+.platform-card-img-inner{
+  width:100%;height:100%;background:var(--steel);display:flex;align-items:center;justify-content:center;
+  font-size:52px;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+.platform-card:hover .platform-card-img-inner{transform:scale(1.1) translateZ(10px);}
+.element-badge{
+  display:inline-block;background:rgba(200,146,42,0.12);border:1px solid rgba(200,146,42,0.3);
+  color:var(--gold);font-size:10px;font-weight:700;padding:4px 12px;border-radius:3px;
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;font-family:'IBM Plex Mono',monospace;
+}
+.platform-card h3{
+  font-family:'Playfair Display',serif;color:rgba(200,146,42,0.95);
+  font-size:18px;margin-bottom:10px;letter-spacing:0.3px;
+}
+.platform-card p.short-text{color:#8B9CC4;font-size:14px;line-height:1.65;margin-bottom:14px;}
+.platform-card p.more-text{color:#6A7899;font-size:13px;line-height:1.7;display:none;margin-bottom:14px;}
+.platform-card.open p.more-text{display:block;}
+.learn-btn{
+  background:transparent;border:1px solid rgba(200,146,42,0.3);
+  color:var(--gold);padding:8px 16px;border-radius:3px;
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:all 0.3s;font-family:'IBM Plex Mono',monospace;
+}
+.learn-btn:hover{background:rgba(200,146,42,0.12);border-color:rgba(200,146,42,0.5);}
+
+@media(max-width:1000px){.platform-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){
+  .platform-section{padding:80px 6%;}
+  .platform-grid{grid-template-columns:1fr;}
+  .platform-container .section-title{font-size:26px;}
+}
+
+/* ============================================================
+   MARKET STRIP   odometer counters
+============================================================ */
+.market-strip{
+  padding:60px 8%;
+  background:linear-gradient(135deg,var(--gold-dark),var(--gold));
+  position:relative;overflow:hidden;
+}
+.market-strip::before{
+  content:"";position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.stats-grid{
+  max-width:1100px;margin:auto;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:30px;
+  position:relative;z-index:1;
+}
+.stat-item{text-align:center;position:relative;}
+.stat-num{
+  display:block;font-family:'Playfair Display',serif;font-size:40px;font-weight:700;
+  color:var(--white);margin-bottom:8px;letter-spacing:1px;
+}
+.stat-desc{color:rgba(255,255,255,0.82);font-size:13px;line-height:1.6;}
+/* Animated underline on stat */
+.stat-item::after{
+  content:"";display:block;width:0;height:2px;background:rgba(255,255,255,0.5);
+  margin:14px auto 0;transition:width 0.6s cubic-bezier(0.23,1,0.32,1);
+}
+.stat-item.visible::after{width:40px;}
+
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr;}.stat-num{font-size:32px;}}
+
+/* ============================================================
+   GAUGE WIDGET SECTION
+============================================================ */
+.gauge-section{
+  padding:100px 8%;background:var(--steel);position:relative;overflow:hidden;
+}
+.gauge-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--gold);opacity:0.06;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.gauge-container{max-width:1100px;margin:auto;position:relative;z-index:2;}
+.gauge-container .section-title{color:var(--gold);}
+.gauge-container .section-label{color:var(--amber-pale);}
+.gauge-container .section-divider{background:linear-gradient(90deg,var(--gold),transparent);}
+.gauge-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;margin-top:50px;}
+.gauge-left p{color:#8B9CC4;font-size:16px;line-height:1.8;margin-bottom:28px;}
+.gauge-bars{display:flex;flex-direction:column;gap:20px;}
+.gauge-bar-item{}
+.gauge-bar-label{
+  display:flex;justify-content:space-between;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;
+  color:rgba(200,146,42,0.8);letter-spacing:1px;margin-bottom:8px;
+}
+.gauge-bar-track{
+  height:6px;background:rgba(200,146,42,0.12);border-radius:3px;overflow:hidden;
+}
+.gauge-bar-fill{
+  height:100%;border-radius:3px;width:0;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));
+  transition:width 1.5s cubic-bezier(0.23,1,0.32,1);
+  position:relative;
+}
+.gauge-bar-fill::after{
+  content:"";position:absolute;right:0;top:-3px;width:12px;height:12px;
+  border-radius:50%;background:var(--gold-light);
+  box-shadow:0 0 10px rgba(229,174,72,0.7);
+}
+
+/* SVG Radial Gauge */
+.gauge-right{display:flex;flex-direction:column;align-items:center;gap:24px;}
+.radial-gauge{position:relative;width:220px;height:220px;}
+.radial-gauge svg{width:100%;height:100%;}
+.gauge-bg-circle{fill:none;stroke:rgba(200,146,42,0.12);stroke-width:12;}
+.gauge-fill-circle{
+  fill:none;stroke:url(#gaugeGrad);stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:565;stroke-dashoffset:565;
+  transition:stroke-dashoffset 2s cubic-bezier(0.23,1,0.32,1);
+  transform:rotate(-90deg);transform-origin:50% 50%;
+}
+.gauge-center-text{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+}
+.gauge-pct{
+  font-family:'Playfair Display',serif;font-size:48px;font-weight:700;
+  color:var(--gold);line-height:1;
+}
+.gauge-label{
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;
+  color:rgba(200,146,42,0.6);text-transform:uppercase;margin-top:6px;
+}
+.gauge-subtitle{color:#8B9CC4;font-size:13px;text-align:center;max-width:200px;line-height:1.6;}
+
+@media(max-width:900px){.gauge-grid{grid-template-columns:1fr;}.gauge-right{order:-1;}}
+@media(max-width:600px){.gauge-section{padding:80px 6%;}}
+
+/* ============================================================
+   PRICING  with tab switcher
+============================================================ */
+.pricing-section{padding:130px 8%;background:var(--off-white);position:relative;overflow:hidden;}
+.pricing-section::before{
+  content:"";position:absolute;top:0;right:0;width:240px;height:240px;
+  background:var(--gold);opacity:0.07;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.pricing-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:250px;height:250px;
+  background:var(--deep);opacity:0.06;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.pricing-container{max-width:1100px;margin:auto;text-align:center;position:relative;z-index:2;}
+.pricing-container .section-title{color:var(--text-dark);}
+.pricing-container .section-label{color:var(--blue-accent);}
+.pricing-container .section-divider{margin:14px auto 26px;background:linear-gradient(90deg,var(--gold),transparent);}
+.pricing-sub{max-width:640px;margin:0 auto 40px;color:#3A4268;line-height:1.8;font-size:16px;}
+
+/* ── Billing toggle ── */
+.billing-toggle{
+  display:inline-flex;align-items:center;gap:14px;
+  background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.2);
+  border-radius:40px;padding:6px 6px 6px 18px;margin-bottom:50px;
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1px;
+}
+.billing-toggle span{color:#888;}
+.billing-toggle span.active{color:var(--text-dark);font-weight:700;}
+.toggle-switch{
+  width:48px;height:26px;background:rgba(200,146,42,0.2);border-radius:13px;
+  position:relative;cursor:pointer;transition:background 0.3s;flex-shrink:0;
+}
+.toggle-switch.on{background:var(--gold);}
+.toggle-knob{
+  position:absolute;width:20px;height:20px;background:var(--white);
+  border-radius:50%;top:3px;left:3px;transition:left 0.3s cubic-bezier(0.23,1,0.32,1);
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+.toggle-switch.on .toggle-knob{left:25px;}
+.save-badge{
+  background:var(--gold);color:var(--white);
+  font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700;letter-spacing:1px;
+}
+
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;align-items:start;}
+.price-card{
+  background:var(--white);border:1px solid #E2DACE;border-radius:12px;
+  padding:36px 30px;text-align:left;transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+  box-shadow:0 4px 20px rgba(0,0,0,0.05);
+}
+.price-card.featured{
+  background:var(--deep);border:1px solid rgba(200,146,42,0.3);
+  box-shadow:0 8px 40px rgba(200,146,42,0.25);transform:scale(1.04);
+}
+.price-card:hover{
+  box-shadow:0 20px 50px rgba(200,146,42,0.2);
+  transform:translateY(-6px);
+}
+.price-card.featured:hover{transform:scale(1.04) translateY(-6px);}
+.price-tag{
+  display:inline-block;background:rgba(200,146,42,0.1);
+  color:var(--gold-dark);border:1px solid rgba(200,146,42,0.25);
+  font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 12px;border-radius:3px;margin-bottom:16px;
+  font-family:'IBM Plex Mono',monospace;
+}
+.price-card.featured .price-tag{background:rgba(200,146,42,0.18);color:var(--gold-light);}
+.price-card h3{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:6px;color:var(--text-dark);letter-spacing:0.5px;}
+.price-card.featured h3{color:var(--gold);}
+.price-card > p{color:#5A6490;font-size:14px;margin-bottom:4px;}
+.price-card.featured > p{color:#8B9CC4;}
+.price-amount{
+  font-family:'Playfair Display',serif;font-size:34px;font-weight:700;
+  color:var(--gold-dark);margin:16px 0 6px;display:block;
+  transition:opacity 0.3s;
+}
+.price-card.featured .price-amount{color:var(--gold);}
+.price-unit{color:#888;font-size:13px;margin-bottom:22px;}
+.price-card.featured .price-unit{color:#8B9CC4;}
+.price-features{list-style:none;margin-bottom:28px;}
+.price-features li{
+  padding:9px 0;border-bottom:1px solid rgba(0,0,0,0.06);
+  color:#3A4268;font-size:14px;display:flex;gap:10px;align-items:flex-start;
+}
+.price-card.featured .price-features li{border-bottom-color:rgba(255,255,255,0.07);color:#8B9CC4;}
+.price-features li:last-child{border-bottom:none;}
+.check{color:var(--gold);font-weight:700;flex-shrink:0;}
+.price-btn{
+  display:block;text-align:center;padding:13px;border-radius:5px;
+  text-decoration:none;font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+  transition:all 0.3s;font-family:'IBM Plex Mono',monospace;
+}
+.price-btn-outline{border:1px solid var(--deep);color:var(--deep);}
+.price-btn-outline:hover{background:var(--deep);color:var(--white);}
+.price-btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--white);}
+.price-btn-gold:hover{filter:brightness(1.12);transform:translateY(-1px);}
+
+@media(max-width:900px){.pricing-grid{grid-template-columns:1fr;}.price-card.featured{transform:scale(1);}.price-card.featured:hover{transform:translateY(-6px);}}
+@media(max-width:600px){.pricing-section{padding:80px 6%;}.pricing-container .section-title{font-size:26px;}}
+
+/* ============================================================
+   TIMELINE
+============================================================ */
+.timeline-section{padding:120px 8%;background:var(--deep-mid);position:relative;overflow:hidden;}
+.timeline-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--gold);opacity:0.05;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.timeline-container{max-width:1100px;margin:auto;position:relative;z-index:2;}
+.timeline-container .section-title{color:var(--gold);}
+.timeline-container .section-label{color:var(--amber-pale);}
+.timeline-container .section-divider{background:linear-gradient(90deg,var(--gold),transparent);}
+.timeline-sub{color:#8B9CC4;font-size:16px;line-height:1.8;max-width:620px;margin:0 0 60px;}
+.timeline-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;}
+.timeline-card{
+  background:rgba(200,146,42,0.06);border:1px solid rgba(200,146,42,0.18);
+  border-radius:10px;padding:28px 24px;position:relative;overflow:hidden;
+  transition:all 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+.timeline-card::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--blue-accent));
+}
+/* Animated progress indicator */
+.timeline-card::after{
+  content:"";position:absolute;bottom:0;left:0;height:2px;width:0;
+  background:linear-gradient(90deg,var(--gold),var(--amber-pale));
+  transition:width 0.8s cubic-bezier(0.23,1,0.32,1);
+}
+.timeline-card:hover::after,.timeline-card.visible::after{width:100%;}
+.timeline-card:hover{
+  transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.5);
+  border-color:rgba(200,146,42,0.35);
+}
+.timeline-year{
+  font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:3px;text-transform:uppercase;color:var(--amber-pale);margin-bottom:12px;
+}
+.timeline-card h3{
+  font-family:'Playfair Display',serif;color:var(--gold);font-size:19px;margin-bottom:12px;
+}
+.timeline-card ul{list-style:none;padding:0;}
+.timeline-card ul li{
+  color:#8B9CC4;font-size:13.5px;padding:6px 0;border-bottom:1px solid rgba(200,146,42,0.08);
+  display:flex;gap:8px;align-items:flex-start;line-height:1.55;
+}
+.timeline-card ul li:last-child{border-bottom:none;}
+.timeline-card ul li::before{content:"▸";color:var(--gold);flex-shrink:0;font-size:12px;margin-top:2px;}
+
+@media(max-width:900px){.timeline-grid{grid-template-columns:1fr;}}
+@media(max-width:600px){.timeline-section{padding:80px 6%;}}
+
+/* ============================================================
+   FAQ
+============================================================ */
+.faq-section{padding:130px 8%;background:var(--deep);position:relative;overflow:hidden;}
+.faq-section::before{
+  content:"";position:absolute;top:0;right:0;width:260px;height:260px;
+  background:var(--gold);opacity:0.06;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.faq-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:250px;height:250px;
+  background:var(--blue-accent);opacity:0.05;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.faq-container{max-width:900px;margin:auto;position:relative;z-index:2;}
+.faq-header{text-align:center;margin-bottom:50px;}
+.faq-section .section-title{color:var(--gold);}
+.faq-section .section-divider{margin:14px auto 0;background:linear-gradient(90deg,var(--gold),transparent);}
+.faq-item{
+  border-bottom:1px solid rgba(200,146,42,0.12);overflow:hidden;
+  transition:background 0.3s;border-radius:6px;margin-bottom:2px;
+}
+.faq-item.open{background:rgba(200,146,42,0.04);}
+.faq-question{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 16px 22px 0;cursor:pointer;gap:20px;
+}
+.faq-item.open .faq-question{padding-left:16px;}
+.faq-question h4{
+  font-family:'Source Sans 3',sans-serif;color:rgba(255,255,255,0.88);
+  font-size:16px;font-weight:600;line-height:1.5;transition:color 0.3s;
+}
+.faq-item.open .faq-question h4{color:var(--gold-light);}
+.faq-icon{
+  color:var(--gold);font-size:22px;font-weight:300;flex-shrink:0;
+  transition:transform 0.4s cubic-bezier(0.23,1,0.32,1);font-family:'IBM Plex Mono',monospace;
+  width:28px;height:28px;border:1px solid rgba(200,146,42,0.3);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.faq-item.open .faq-icon{transform:rotate(45deg);background:rgba(200,146,42,0.1);}
+.faq-answer{
+  max-height:0;overflow:hidden;
+  transition:max-height 0.5s cubic-bezier(0.23,1,0.32,1),padding 0.35s;
+  color:#8B9CC4;font-size:15px;line-height:1.8;padding:0 16px;
+}
+.faq-item.open .faq-answer{max-height:600px;padding:0 16px 22px;}
+
+@media(max-width:600px){
+  .faq-section{padding:80px 6%;}
+  .faq-question h4{font-size:14px;}
+}
+
+/* ============================================================
+   CONTACT
+============================================================ */
+.contact-section{padding:130px 8%;background:var(--steel);position:relative;overflow:hidden;}
+.contact-section::before{
+  content:"";position:absolute;top:0;right:0;width:250px;height:250px;
+  background:var(--gold);opacity:0.05;clip-path:polygon(100% 0,0 0,100% 100%);
+}
+.contact-section::after{
+  content:"";position:absolute;bottom:0;left:0;width:250px;height:250px;
+  background:var(--blue-accent);opacity:0.04;clip-path:polygon(0 100%,0 0,100% 100%);
+}
+.contact-container{
+  max-width:1100px;margin:auto;
+  display:grid;grid-template-columns:1fr 1.4fr;gap:80px;
+  align-items:start;position:relative;z-index:2;
+}
+.contact-section .section-title{color:var(--gold);}
+.contact-section .section-divider{background:linear-gradient(90deg,var(--gold),transparent);}
+.contact-left > p{color:#8B9CC4;line-height:1.8;margin-bottom:30px;font-size:16px;}
+.contact-info-item{
+  display:flex;align-items:flex-start;gap:16px;
+  padding:18px 0;border-bottom:1px solid rgba(200,146,42,0.1);
+  transition:transform 0.3s,padding-left 0.3s;
+}
+.contact-info-item:hover{transform:translateX(6px);}
+.contact-info-item:last-of-type{border-bottom:none;}
+.contact-icon{
+  width:40px;height:40px;background:rgba(200,146,42,0.1);border:1px solid rgba(200,146,42,0.22);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  color:var(--gold);font-size:18px;flex-shrink:0;transition:background 0.3s;
+}
+.contact-info-item:hover .contact-icon{background:rgba(200,146,42,0.18);}
+.contact-info-text{display:flex;flex-direction:column;gap:3px;}
+.contact-info-text strong{color:rgba(255,255,255,0.85);font-size:14px;font-weight:600;}
+.contact-info-text span{color:#8B9CC4;font-size:14px;}
+.contact-right{
+  background:rgba(200,146,42,0.04);border:1px solid rgba(200,146,42,0.18);
+  border-radius:12px;padding:42px;position:relative;overflow:hidden;
+  transition:box-shadow 0.4s;
+}
+.contact-right:focus-within{box-shadow:0 0 0 2px rgba(200,146,42,0.25),0 16px 40px rgba(0,0,0,0.4);}
+.contact-right::before{
+  content:"";position:absolute;top:0;left:0;right:0;
+  height:2px;background:linear-gradient(90deg,var(--gold),var(--blue-accent));
+}
+.contact-form{display:flex;flex-direction:column;gap:20px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{
+  color:rgba(200,146,42,0.85);font-size:12px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;font-family:'IBM Plex Mono',monospace;
+  transition:color 0.3s;
+}
+.form-group:focus-within label{color:var(--gold-light);}
+.form-group input,
+.form-group select,
+.form-group textarea{
+  background:rgba(255,255,255,0.04);border:1px solid rgba(200,146,42,0.2);
+  color:var(--white);padding:13px 16px;border-radius:6px;font-size:15px;
+  font-family:'Source Sans 3',sans-serif;transition:all 0.3s;outline:none;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+  border-color:var(--gold);background:rgba(200,146,42,0.06);
+  box-shadow:0 0 0 3px rgba(200,146,42,0.12);
+}
+.form-group select option{background:var(--deep-mid);color:var(--white);}
+.form-group textarea{min-height:130px;resize:vertical;}
+/* Floating label effect on input */
+.form-group input::placeholder,
+.form-group textarea::placeholder{color:rgba(139,156,196,0.5);}
+
+.form-submit{
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  color:var(--white);border:none;padding:15px;border-radius:6px;
+  font-weight:700;font-size:13px;letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;transition:all 0.3s;font-family:'IBM Plex Mono',monospace;
+  position:relative;overflow:hidden;
+}
+.form-submit::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 60%);
+  opacity:0;transition:opacity 0.3s;
+}
+.form-submit:hover::before{opacity:1;}
+.form-submit:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,146,42,0.4);}
+.form-submit:active{transform:translateY(0);}
+.form-success{display:none;text-align:center;padding:40px 20px;color:var(--gold-light);font-weight:600;font-family:'IBM Plex Mono',monospace;font-size:15px;}
+
+/* ── Char counter for textarea ── */
+.char-count{font-size:11px;color:rgba(139,156,196,0.5);text-align:right;font-family:'IBM Plex Mono',monospace;margin-top:4px;}
+.char-count.warn{color:rgba(200,146,42,0.7);}
+
+@media(max-width:900px){
+  .contact-section{padding:90px 6%;}
+  .contact-container{grid-template-columns:1fr;gap:50px;}
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+.footer{background:var(--deep);padding:70px 8% 30px;border-top:1px solid rgba(200,146,42,0.12);}
+.footer-grid{
+  max-width:1100px;margin:0 auto 50px;
+  display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;
+}
+.footer-brand .logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.logo-icon-sm{
+  width:32px;height:32px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  border-radius:7px;display:flex;align-items:center;justify-content:center;
+}
+.logo-icon-sm svg{width:18px;height:18px;}
+.logo-text{font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);font-weight:700;}
+.logo-text span{color:var(--white);font-weight:400;}
+.footer-brand > p{color:#6A7899;font-size:14px;line-height:1.8;max-width:320px;}
+.footer-col h4{
+  color:var(--gold);font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;margin-bottom:18px;
+}
+.footer-col a{
+  display:block;color:#6A7899;font-size:14px;text-decoration:none;margin-bottom:10px;
+  transition:all 0.3s;position:relative;padding-left:0;
+}
+.footer-col a::before{
+  content:"▸";position:absolute;left:-14px;color:var(--gold);
+  opacity:0;transition:all 0.3s;font-size:11px;
+}
+.footer-col a:hover{color:var(--gold);padding-left:16px;}
+.footer-col a:hover::before{opacity:1;left:0;}
+.footer-bottom{
+  max-width:1100px;margin:auto;
+  border-top:1px solid rgba(200,146,42,0.08);padding-top:24px;
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+}
+.footer-bottom p{color:#4A5470;font-size:13px;}
+.footer-bottom p span{color:var(--gold);}
+
+@media(max-width:900px){
+  .footer-grid{grid-template-columns:1fr;gap:35px;}
+  .footer-bottom{flex-direction:column;text-align:center;}
+}
+
+/* ============================================================
+   SCROLL REVEAL  staggered children
+============================================================ */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity 0.65s ease,transform 0.65s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+/* Stagger children */
+.stagger > *{opacity:0;transform:translateY(24px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.stagger.visible > *:nth-child(1){opacity:1;transform:none;transition-delay:0s;}
+.stagger.visible > *:nth-child(2){opacity:1;transform:none;transition-delay:0.08s;}
+.stagger.visible > *:nth-child(3){opacity:1;transform:none;transition-delay:0.16s;}
+.stagger.visible > *:nth-child(4){opacity:1;transform:none;transition-delay:0.24s;}
+.stagger.visible > *:nth-child(5){opacity:1;transform:none;transition-delay:0.32s;}
+.stagger.visible > *:nth-child(6){opacity:1;transform:none;transition-delay:0.40s;}
+
+/* ============================================================
+   PROGRESS BAR
+============================================================ */
+#progress-bar{
+  position:fixed;top:0;left:0;height:3px;width:0%;
+  background:linear-gradient(90deg,var(--gold-dark),var(--gold),var(--amber-pale));
+  z-index:9999;transition:width 0.1s linear;
+  box-shadow:0 0 8px rgba(200,146,42,0.6);
+}
+
+/* ============================================================
+   PARTICLE CANVAS
+============================================================ */
+#particle-canvas{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.45;}
+
+/* ============================================================
+   BACK TO TOP
+============================================================ */
+#back-top{
+  position:fixed;bottom:30px;right:30px;width:46px;height:46px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dark));
+  border:none;border-radius:50%;cursor:pointer;
+  display:none;align-items:center;justify-content:center;z-index:999;
+  color:white;font-size:18px;
+  box-shadow:0 4px 20px rgba(200,146,42,0.45);
+  transition:all 0.3s cubic-bezier(0.23,1,0.32,1);
+}
+#back-top:hover{transform:translateY(-4px) scale(1.08);box-shadow:0 8px 28px rgba(200,146,42,0.6);}
+#back-top.show{display:flex;}
+
+/* ── Radar pulse on back-top ── */
+#back-top::before{
+  content:"";position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid rgba(200,146,42,0.4);
+  animation:radar-ring 2s ease-out infinite;
+}
+@keyframes radar-ring{0%{transform:scale(1);opacity:0.8;}100%{transform:scale(1.6);opacity:0;}}
+
+/* ============================================================
+   TOOLTIP
+============================================================ */
+.stat-item[data-tip]{position:relative;cursor:default;}
+.stat-item[data-tip]::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;
+  transform:translateX(-50%);background:rgba(7,9,15,0.96);color:#DDD8C4;
+  font-size:12px;white-space:nowrap;padding:6px 12px;border-radius:5px;
+  pointer-events:none;opacity:0;transition:opacity 0.25s;
+  border:1px solid rgba(200,146,42,0.2);font-family:'IBM Plex Mono',monospace;
+}
+.stat-item[data-tip]:hover::after{opacity:1;}
+
+/* ── Active nav highlight ── */
+#navMenu a.nav-active{color:var(--gold);}
+#navMenu a.nav-active::after{width:100%;}
+
+/* ── Page loader ── */
+#page-loader{
+  position:fixed;inset:0;background:var(--deep);z-index:99998;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:24px;
+  transition:opacity 0.6s,visibility 0.6s;
+}
+#page-loader.hide{opacity:0;visibility:hidden;}
+.loader-logo{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);letter-spacing:2px;}
+.loader-bar{width:200px;height:3px;background:rgba(200,146,42,0.15);border-radius:2px;overflow:hidden;}
+.loader-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold-light));animation:loader-go 1.2s cubic-bezier(0.23,1,0.32,1) forwards;}
+@keyframes loader-go{from{width:0;}to{width:100%;}}
+
+</style>
+</head>
+<body>
+
+<!-- PAGE LOADER -->
+<div id="page-loader">
+  <div class="loader-logo">ZATO-AeroGuard</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
+</div>
+
+<!-- CUSTOM CURSOR -->
+<div id="cursor-ring"></div>
+<div id="cursor-dot"></div>
+
+<!-- PROGRESS BAR -->
+<div id="progress-bar"></div>
+
+<!-- BACK TO TOP -->
+<button id="back-top" aria-label="Back to top">↑</button>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+
+    <a class="logo" href="#" id="logo-link">
+      ZATO<span>-AeroGuard</span>
+    </a>
+
+    <div id="navMenu">
+      <a href="#about">About</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#services">Platform</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+    </div>
+
+    <div id="utc-clock">UTC --:--:--</div>
+
+    <div class="menu-toggle" id="menuToggle">
+      <span></span><span></span><span></span>
+    </div>
+
+  </div>
+</nav>
+<!-- ===================== HERO ===================== -->
+<section class="hero-section" id="home">
+  <canvas id="particle-canvas"></canvas>
+
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-container">
+    <div class="hero-left">
+      <div class="hero-badge">TRL-7 Validated · UK AvTech 2026</div>
+      <h1>
+        <span>Zero-Downtime</span><br>
+        Asset<br>
+        <span id="hero-word" class="typing-word">Transition.</span>
+      </h1>
+      <div class="hero-divider"></div>
+      <p class="hero-text">
+        ZATO-AeroGuard is the world's first AI-powered Transactional Digital Twin for aircraft ownership migration  converting fragmented maintenance records into real-time airworthiness and financial liquidity. <strong style="color:#E5AE48;">Transition. Diversify. Grow.</strong>
+      </p>
+      <div class="hero-buttons">
+        <a href="#contact" class="btn-gold">Request a Pilot →</a>
+        <a href="#how-it-works" class="btn-outline-gold">How It Works</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-card" id="heroCard">
+        <div class="platform-card-shine" id="cardShine"></div>
+        <div class="hero-card-title">// Platform Intelligence Matrix</div>
+        <div class="hero-stat">
+          <div class="stat-dot"></div>
+          <span class="stat-label">OCR Accuracy on Handwritten Archives</span>
+          <span class="stat-val">94%</span>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-dot blue"></div>
+          <span class="stat-label">Record Retrieval Latency (RFI Engine)</span>
+          <span class="stat-val">&lt;200ms</span>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-dot"></div>
+          <span class="stat-label">Manual Audit Hour Reduction</span>
+          <span class="stat-val">−70%</span>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-dot blue"></div>
+          <span class="stat-label">Non-Compliance Detection Precision</span>
+          <span class="stat-val">98%</span>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-dot"></div>
+          <span class="stat-label">Global Aircraft Leasing TAM (USD)</span>
+          <span class="stat-val">$170B+</span>
+        </div>
+        <div class="hero-stat">
+          <div class="stat-dot blue"></div>
+          <span class="stat-label">Platform TRL Status</span>
+          <span class="stat-val">TRL-7 ✓</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="radar-strip"><div class="radar-sweep"></div></div>
+
+<!-- ===================== ABOUT ===================== -->
+<section class="about-section" id="about">
+  <div class="about-container">
+    <div class="about-left reveal">
+      <div class="section-label">About ZATO-AeroGuard</div>
+      <h2 class="section-title">From Passive Records<br>to Active Asset Liquidity</h2>
+      <div class="section-divider"></div>
+      <p>
+        ZATO-AeroGuard introduces a category-defining aviation asset intelligence platform that bridges the critical "Digital Trust Gap" between technical maintenance records and financial asset liquidity. Unlike passive digital record hubs or storage silos, ZATO functions as an "Active Intelligence" layer  creating a living Transactional Digital Twin of every aircraft asset.
+      </p>
+      <p>
+        Powered by LayoutLM computer vision, natural language processing, blockchain-backed audit trails, and a proprietary Asset Stability Score, the system converts 50,000+ pages of fragmented MRO data into real-time airworthiness and financial liability models with sub-200ms retrieval speeds.
+      </p>
+      <div class="about-features stagger">
+        <div class="feature-tag">UK CAA CAP 1330 Aligned</div>
+        <div class="feature-tag">GDPR &amp; ISO 27001 Ready</div>
+        <div class="feature-tag">Blockchain Audit Ledger</div>
+        <div class="feature-tag">Hangar Edge AI Hubs</div>
+        <div class="feature-tag">B2B SaaS + Audit Packs</div>
+        <div class="feature-tag">ATA Spec 2500 Compliant</div>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="founder-box">
+
+        <div class="founder-box-title">Founder &amp; CEO</div>
+        <div class="founder-box-div"></div>
+        <p>
+          <strong>Ronak Mistry</strong> brings over 9.5 years of meticulous experience in aircraft airworthiness activities and technical documentation management at Tier-1 MROs including Lufthansa Technik and Virgin Atlantic.
+        </p>
+        <p>
+          His <strong>"on-the-wing"</strong> engineering expertise and <strong>"in-the-records"</strong> technical consulting ensures the platform solves real-world transition bottlenecks  from handwritten "dirty fingerprint" logs to cross-border CAA/EASA/FAA registry migrations.
+        </p>
+        <a href="#contact" class="contact-btn">Get In Touch →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PROCESS ===================== -->
+<section class="process-section" id="how-it-works">
+  <div class="process-container">
+    <div class="section-label reveal">How ZATO Works</div>
+    <h2 class="section-title reveal">From Fragmented Data to Zero-Downtime Transition</h2>
+    <div class="section-divider reveal" style="margin:14px auto 26px;"></div>
+
+    <p class="process-sub reveal">
+      ZATO-AeroGuard orchestrates every stage of the aircraft ownership migration lifecycle  from predictive audit-readiness 12 months before lease expiry to immutable blockchain sign-offs at handover.
+    </p>
+
+    <div class="process-grid stagger">
+
+      <!-- Stage 01 -->
+      <div class="process-card">
+        <div class="process-card-img">
+          <img src="zato1.png" alt="OCR scanning" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="step-badge">Stage 01</div>
+        <h3>Ingest &amp; Digitise</h3>
+        <p>High-speed AI OCR (LayoutLM) ingests 50,000+ pages of MRO records  including handwritten "dirty fingerprint" logbooks  with 94% accuracy, converting analogue archives into structured transactional data.</p>
+      </div>
+
+      <!-- Stage 02 -->
+      <div class="process-card">
+        <div class="process-card-img">
+          <img src="zato2.png" alt="digital twin system" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="step-badge">Stage 02</div>
+        <h3>Build Transactional Twin</h3>
+        <p>The platform constructs a living Digital Twin mapping every maintenance event, component swap, LLP trace, and repair against lease redelivery conditions  updated in real-time with sub-200ms retrieval.</p>
+      </div>
+
+      <!-- Stage 03 -->
+      <div class="process-card">
+        <div class="process-card-img">
+          <img src="zato3.png" alt="analytics risk scoring" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="step-badge">Stage 03</div>
+        <h3>Score &amp; Predict Risk</h3>
+        <p>The proprietary Asset Stability Score and Regulatory Friction Index automatically quantify documentation robustness and compute cross-border migration complexity across UK CAA, EASA, and FAA registries.</p>
+      </div>
+
+      <!-- Stage 04 -->
+      <div class="process-card">
+        <div class="process-card-img">
+          <img src="zato4.png" alt="blockchain security" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="step-badge">Stage 04</div>
+        <h3>Blockchain Handover</h3>
+        <p>Every technical sign-off, document upload, and airworthiness verification is immutably recorded on a private blockchain ledger  eliminating "missing record" disputes and delivering a verifiable Chain of Evidence.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PLATFORM SERVICES ===================== -->
+<section class="platform-section" id="services">
+  <div class="platform-container">
+    <div class="section-label reveal">Our Intelligence Engines</div>
+    <h2 class="section-title reveal">Six Proprietary ZATO Modules</h2>
+    <div class="section-divider reveal" style="margin:14px auto 26px;"></div>
+
+    <p class="platform-sub reveal">
+      ZATO-AeroGuard's architecture comprises six specialised intelligence modules  each precision-engineered to transform aviation technical records from a compliance burden into a primary driver of asset liquidity and financial certainty.
+    </p>
+
+    <div class="platform-grid stagger">
+
+      <!-- Engine A -->
+      <div class="platform-card" id="card-a">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato5.png" alt="AI engine" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine A</div>
+        <h3>Transactional Digital Twin Engine</h3>
+        <p class="short-text">Creates a living virtual replica of the aircraft's technical and legal status...</p>
+        <p class="more-text">Using Deep Convolutional Neural Networks and LayoutLM-based document understanding, the Transactional Digital Twin builds a continuously updated virtual replica of each aircraft's full technical, legal, and financial status. Every maintenance event, LLP trace, SB/AD compliance record, and structural repair is mapped in real-time  enabling lessors and CAMOs to monitor asset airworthiness and redelivery readiness from a single intelligence dashboard, with sub-200ms data retrieval latency.</p>
+        <button class="learn-btn" onclick="toggleCard('card-a',this)">Learn More</button>
+      </div>
+
+      <!-- Engine B -->
+      <div class="platform-card" id="card-b">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato6.png" alt="shield security" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine B</div>
+        <h3>Asset Stability Score (ASS)</h3>
+        <p class="short-text">The industry's first quantitative metric...</p>
+        <p class="more-text">ZATO's proprietary scoring engine analyses over 40 weighted parameters  including documentation completeness, AD/SB compliance status, LLP life remaining, historical repair quality, and cross-border re-registration risk  to produce a single Asset Stability Score (0–100). This score gives lessors, investors, and banks an objective, auditable measure of an aircraft's financial liquidity and airworthiness confidence at any point in the asset lifecycle.</p>
+        <button class="learn-btn" onclick="toggleCard('card-b',this)">Learn More</button>
+      </div>
+
+      <!-- Engine C -->
+      <div class="platform-card" id="card-c">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato7.png" alt="global network" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine C</div>
+        <h3>Regulatory Friction Index (RFI)</h3>
+        <p class="short-text">Automated compliance mapper...</p>
+        <p class="more-text">ZATO's RFI module cross-references live regulatory databases across UK CAA, EASA, FAA, TCCA, and CAAC to compute the precise documentation gaps, estimated re-registration timelines, and associated cost exposure for any cross-border aircraft migration. Lessors receive an automated friction report  quantifying expected delays, outstanding compliance actions, and financial risk exposure  weeks before a transition event occurs, enabling proactive mitigation.</p>
+        <button class="learn-btn" onclick="toggleCard('card-c',this)">Learn More</button>
+      </div>
+
+      <!-- Engine D -->
+      <div class="platform-card" id="card-d">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato8.png" alt="blockchain lock" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine D</div>
+        <h3>Blockchain Handover Ledger</h3>
+        <p class="short-text">A private blockchain trust layer...</p>
+        <p class="more-text">ZATO employs a private, permissioned blockchain ledger to create an immutable Chain of Evidence for every aircraft transition event. Technical sign-offs, document uploads, airworthiness verifications, and CAA/EASA submissions are cryptographically timestamped and stored  eliminating "missing record" disputes between lessors and lessees, and providing aviation banks and legal advisors with a legally defensible audit trail from day one of asset ownership transfer.</p>
+        <button class="learn-btn" onclick="toggleCard('card-d',this)">Learn More</button>
+      </div>
+
+      <!-- Engine E -->
+      <div class="platform-card" id="card-e">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato9.png" alt="edge computing" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine E</div>
+        <h3>Hangar Edge AI Hubs</h3>
+        <p class="short-text">Pre-configured physical edge-AI units...</p>
+        <p class="more-text">ZATO's Hangar Edge Hubs are pre-configured physical AI processing units deployed directly at MRO facilities and hangar sites  enabling offline-capable document ingestion, real-time OCR processing, and secure data synchronisation even in low-connectivity hangar environments. Each hub integrates with AMOS, TRAX, and Ultramain via RESTful APIs, ensuring zero-gap data continuity between line maintenance operations and the central Digital Twin platform.</p>
+        <button class="learn-btn" onclick="toggleCard('card-e',this)">Learn More</button>
+      </div>
+
+      <!-- Engine F -->
+      <div class="platform-card" id="card-f">
+        <div class="platform-card-shine"></div>
+        <div class="platform-card-img">
+          <img src="zato10.png" alt="analytics graph" style="width:100%; height:100%; object-fit:contain;">
+        </div>
+        <div class="element-badge">Engine F</div>
+        <h3>Scenario-Based Transition Simulation</h3>
+        <p class="short-text">Months before lease expiry...</p>
+        <p class="more-text">The simulation engine incorporates fleet-wide historical transition data, MRO cost benchmarks, and current regulatory timelines to model multiple lease-end scenarios months before expiry. Lessors can stress-test documentation readiness, estimate redelivery compensation exposure, and optimise transition sequencing across multi-asset portfolios  converting reactive audit firefighting into a proactive financial planning discipline with measurable ROI at each transition milestone.</p>
+        <button class="learn-btn" onclick="toggleCard('card-f',this)">Learn More</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+<!-- ===================== MARKET STRIP ===================== -->
+<section class="market-strip">
+  <div class="stats-grid">
+    <div class="stat-item reveal" data-tip="Global aircraft leasing market 2023">
+      <span class="stat-num"><span data-target="170" data-suffix="B+">0</span></span>
+      <div class="stat-desc">USD global aircraft leasing market value  ZATO's total addressable transition intelligence opportunity</div>
+    </div>
+    <div class="stat-item reveal" data-tip="ZATO Operational Testing  TRL 7">
+      <span class="stat-num"><span data-target="94" data-suffix="%">0</span></span>
+      <div class="stat-desc">OCR accuracy achieved on legacy handwritten aviation archives  a core technical barrier for competitors</div>
+    </div>
+    <div class="stat-item reveal" data-tip="ZATO Platform Benchmark">
+      <span class="stat-num">−70%</span>
+      <div class="stat-desc">Reduction in manual audit hours allowing aircraft to return to revenue service weeks faster per transition</div>
+    </div>
+    <div class="stat-item reveal" data-tip="ZATO Financial Modelling">
+      <span class="stat-num">£2.7M</span>
+      <div class="stat-desc">Direct revenue loss prevented per single aircraft asset by eliminating a standard 60-day audit delay</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GAUGE WIDGET ===================== -->
+<section class="gauge-section" id="performance">
+  <div class="gauge-container">
+    <div class="section-label reveal">Platform Performance</div>
+    <h2 class="section-title reveal">Transition Readiness Benchmarks</h2>
+    <div class="section-divider reveal"></div>
+    <div class="gauge-grid">
+      <div class="gauge-left reveal">
+        <p>ZATO-AeroGuard's AI engines have been validated against real-world aircraft transition datasets  demonstrating measurable performance advantages across every critical audit dimension. These benchmarks are derived from operational testing at UK-based MRO facilities and simulated redelivery scenarios.</p>
+        <div class="gauge-bars" id="gaugeBars">
+          <div class="gauge-bar-item">
+            <div class="gauge-bar-label"><span>Handwritten OCR Accuracy</span><span>94%</span></div>
+            <div class="gauge-bar-track"><div class="gauge-bar-fill" data-width="94"></div></div>
+          </div>
+          <div class="gauge-bar-item">
+            <div class="gauge-bar-label"><span>Non-Compliance Detection Precision</span><span>98%</span></div>
+            <div class="gauge-bar-track"><div class="gauge-bar-fill" data-width="98"></div></div>
+          </div>
+          <div class="gauge-bar-item">
+            <div class="gauge-bar-label"><span>Manual Audit Hour Reduction</span><span>70%</span></div>
+            <div class="gauge-bar-track"><div class="gauge-bar-fill" data-width="70"></div></div>
+          </div>
+          <div class="gauge-bar-item">
+            <div class="gauge-bar-label"><span>Document Processing Time Reduction</span><span>40%</span></div>
+            <div class="gauge-bar-track"><div class="gauge-bar-fill" data-width="40"></div></div>
+          </div>
+          <div class="gauge-bar-item">
+            <div class="gauge-bar-label"><span>System Operational Uptime</span><span>99.9%</span></div>
+            <div class="gauge-bar-track"><div class="gauge-bar-fill" data-width="99.9"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="gauge-right reveal">
+        <div class="radial-gauge">
+          <svg viewBox="0 0 200 200">
+            <defs>
+              <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#9B6B17"/>
+                <stop offset="100%" stop-color="#E5AE48"/>
+              </linearGradient>
+            </defs>
+            <circle class="gauge-bg-circle" cx="100" cy="100" r="90"/>
+            <circle class="gauge-fill-circle" id="gaugeFill" cx="100" cy="100" r="90"/>
+          </svg>
+          <div class="gauge-center-text">
+            <div class="gauge-pct" id="gaugePct">0</div>
+            <div class="gauge-label">Asset Readiness</div>
+          </div>
+        </div>
+        <div class="gauge-subtitle">Average Transition Readiness Score across ZATO-managed assets in operational pilot deployments</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== ROADMAP TIMELINE ===================== -->
+<section class="timeline-section" id="roadmap">
+  <div class="timeline-container">
+    <div class="section-label reveal">Strategic Roadmap</div>
+    <h2 class="section-title reveal">Three-Year Growth Trajectory</h2>
+    <div class="section-divider reveal"></div>
+    <p class="timeline-sub reveal">ZATO-AeroGuard follows a structured three-year expansion from UK market validation through European leasing hub deployment to global registry coverage across APAC and North America.</p>
+    <div class="timeline-grid stagger">
+      <div class="timeline-card">
+        <div class="timeline-year">Year 1–2 · Foundation</div>
+        <h3>UK Market Entry</h3>
+        <ul>
+          <li>Launch Transition Readiness Audits with UK regional lessors</li>
+          <li>Achieve UK CAA CAP 1330 certification alignment</li>
+          <li>Deploy Hangar Edge Hubs at Stansted, Luton, Gatwick MRO clusters</li>
+          <li>Onboard first narrow-body (A320/737) institutional clients</li>
+          <li>Revenue target: £75K–£263K ARR</li>
+        </ul>
+      </div>
+      <div class="timeline-card">
+        <div class="timeline-year">Year 3 · Expansion</div>
+        <h3>European Hub Scaling</h3>
+        <ul>
+          <li>Expand into Dublin leasing hub  world's largest aircraft leasing epicenter</li>
+          <li>Wide-body (A350/787) and high-value engine portfolio coverage</li>
+          <li>Deploy RFI module for APAC and US registries</li>
+          <li>File UK/EPO patents for Transactional Digital Twin architecture</li>
+          <li>Revenue target: £1.06M+ ARR</li>
+        </ul>
+      </div>
+      <div class="timeline-card">
+        <div class="timeline-year">Year 4–5 · Global Standard</div>
+        <h3>Global Benchmark Status</h3>
+        <ul>
+          <li>Establish ZATO as the global standard for digital airworthiness transactions</li>
+          <li>Expand to 50+ institutional clients across Dublin, Singapore, New York</li>
+          <li>License Asset Stability Score API to aviation banks and insurers</li>
+          <li>Launch AR-based structural repair mapping (Next-Gen)</li>
+          <li>Revenue target: £2.16M–£3.03M ARR</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section class="pricing-section" id="pricing">
+  <div class="pricing-container">
+    <div class="section-label reveal">Service Packages</div>
+    <h2 class="section-title reveal">Transactional Intelligence.<br>Tailored to Your Fleet.</h2>
+    <div class="section-divider reveal" style="margin:14px auto 26px;"></div>
+    <p class="pricing-sub reveal">Whether you are a regional airline or a Tier-1 global lessor  ZATO has a package for your scale.</p>
+
+    <div class="billing-toggle reveal" id="billingToggle">
+      <span id="monthlyLabel" class="active">Monthly</span>
+      <div class="toggle-switch" id="toggleSwitch" onclick="toggleBilling()">
+        <div class="toggle-knob"></div>
+      </div>
+      <span id="annualLabel">Annual</span>
+      <span class="save-badge" id="saveBadge" style="opacity:0.4;">Save 20%</span>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="price-card reveal">
+        <div class="price-tag">Basic Tier</div>
+        <h3>Regional Operator</h3>
+        <p>For UK regional airlines and smaller CAMO organisations requiring real-time transition monitoring and basic compliance gap analysis.</p>
+        <span class="price-amount" id="price1">£1,013</span>
+        <div class="price-unit" id="unit1">per month · up to 5 narrow-body assets</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Real-time transition monitoring dashboard</li>
+          <li><span class="check">✓</span> Basic RFI cross-border gap analysis</li>
+          <li><span class="check">✓</span> Document health scoring</li>
+          <li><span class="check">✓</span> UK CAA CAP 1330 compliance alignment</li>
+          <li><span class="check">✓</span> Predictive findings reporting</li>
+          <li><span class="check">✓</span> GDPR-compliant encrypted storage</li>
+        </ul>
+        <a href="#contact" class="price-btn price-btn-outline">Get Started →</a>
+      </div>
+      <div class="price-card featured reveal">
+        <div class="price-tag">Professional Tier</div>
+        <h3>Mid-Tier Lessor</h3>
+        <p>For mid-tier aircraft lessors and asset management firms requiring full BTB automation, MRO integration, and structural repair provenance tracking.</p>
+        <span class="price-amount" id="price2">£2,835</span>
+        <div class="price-unit" id="unit2">per month · up to 25 assets</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Basic, plus:</li>
+          <li><span class="check">✓</span> Full BTB audit automation engine</li>
+          <li><span class="check">✓</span> API integration with AMOS / TRAX</li>
+          <li><span class="check">✓</span> Structural Repair Provenance mapping</li>
+          <li><span class="check">✓</span> Scenario-based lease-end simulation</li>
+          <li><span class="check">✓</span> Blockchain handover sign-off ledger</li>
+        </ul>
+        <a href="#contact" class="price-btn price-btn-gold">Request Pilot →</a>
+      </div>
+      <div class="price-card reveal">
+        <div class="price-tag">Enterprise Tier</div>
+        <h3>Global Lessor / Flag Carrier</h3>
+        <p>For Tier-1 global lessors and flag carriers requiring full portfolio-level Digital Twin integration, multi-jurisdictional RFI, and dedicated support.</p>
+        <span class="price-amount" id="price3">Custom</span>
+        <div class="price-unit" id="unit3">avg. £12,150+/month · unlimited assets</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span> Everything in Professional, plus:</li>
+          <li><span class="check">✓</span> Full portfolio-level Digital Twin</li>
+          <li><span class="check">✓</span> Multi-jurisdictional RFI mapping</li>
+          <li><span class="check">✓</span> Hangar Edge Hub deployment</li>
+          <li><span class="check">✓</span> 24/7 dedicated technical support</li>
+          <li><span class="check">✓</span> Custom API / SDK licensing</li>
+        </ul>
+        <a href="#contact" class="price-btn price-btn-outline">Contact Sales →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="faq-section" id="faq">
+  <div class="faq-container">
+    <div class="faq-header">
+      <div class="section-label">Common Questions</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="section-divider" style="margin:14px auto 0;"></div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>What is a Transactional Digital Twin and how is it different from a passive records system?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">A Transactional Digital Twin is a living, real-time virtual replica of an aircraft's technical and legal status  updated continuously as maintenance events, component swaps, and regulatory changes occur. Unlike passive record hubs (FLYdocs, AirVault) that simply store and digitise documents, ZATO-AeroGuard actively analyses the records, identifies compliance "clashes," computes financial liability, and predicts audit failures months before a transition event  functioning as an Active Intelligence layer rather than a static archive.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>How does ZATO handle handwritten "dirty fingerprint" maintenance logs?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">ZATO-AeroGuard employs a proprietary AI OCR engine built on LayoutLM and DenseNet architectures, specifically fine-tuned on legacy aviation handwritten technical records including maintenance release certificates, structural repair maps, and BTB trace documents. Testing has confirmed 94% extraction accuracy on legacy handwritten archives  a core technical barrier that generic OCR solutions cannot replicate.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>Is ZATO compliant with UK CAA CAP 1330 and international airworthiness standards?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">Yes. ZATO-AeroGuard is the first aviation records platform specifically engineered to meet the UK Civil Aviation Authority's Digital Technical Records mandate (CAP 1330). The platform is also aligned with EASA Part-M/Part-CAMO requirements, ATA Spec 2500, ISO/IEC 27001, GDPR, and Cyber Essentials Plus. Compliance documentation and DPIAs are maintained under a version-controlled Quality Management System.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>What is the Regulatory Friction Index (RFI) and why does it matter?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">The Regulatory Friction Index is ZATO's automated compliance mapper that computes the estimated time and cost required to migrate an aircraft between global regulatory registries (UK CAA, EASA, FAA). Without such a tool, lessors frequently underestimate re-registration complexity  leading to missed delivery windows and contractual penalties that can reach six figures per week.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>Can ZATO integrate with existing MRO software such as AMOS and TRAX?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">Yes. ZATO-AeroGuard's integration layer utilises RESTful APIs that support direct data ingestion from major aviation ERP systems including AMOS, TRAX, and Ultramain. Apache Airflow and Kafka pipelines automate the ingestion of technical record packages providing a unified transactional view across all source systems without requiring legacy system replacement.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question" onclick="toggleFaq(this)">
+        <h4>What is the investment required and when does ZATO become self-sustaining?</h4>
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-answer">The platform is fully founder-funded with a £50,000 equity injection in Year 1. Revenue generation commences in Month 7 at £3,422 and grows to £18,822 by Month 12. The business becomes cash-flow positive from Month 8 and ends Year 1 with a cash balance of £78,991  already exceeding the initial capital, requiring zero external debt.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section class="contact-section" id="contact">
+  <div class="contact-container">
+    <div class="contact-left reveal">
+      <div class="section-label">Get In Touch</div>
+      <h2 class="section-title">Request a Pilot Transition Audit</h2>
+      <div class="section-divider"></div>
+      <p>Ready to see ZATO-AeroGuard in action? We offer complimentary Transition Readiness Audits for single aircraft assets with selected Tier-1 lessors and regional UK airlines  demonstrating measurable downtime reduction and Asset Stability Scoring accuracy with no commitment required.</p>
+      <div class="contact-info-item">
+        <div class="contact-icon">✈️</div>
+        <div class="contact-info-text"><strong>Platform</strong><span>ZATO-AeroGuard · Asset Transition Ltd.</span></div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">📍</div>
+        <div class="contact-info-text"><strong>Headquarters</strong><span>London, United Kingdom</span></div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">🏭</div>
+        <div class="contact-info-text"><strong>Operational Hubs</strong><span>London Stansted · Luton · Gatwick MRO Clusters</span></div>
+      </div>
+      <div class="contact-info-item">
+        <div class="contact-icon">🌐</div>
+        <div class="contact-info-text"><strong>Expansion Markets</strong><span>Dublin · Singapore · New York (Year 3–5)</span></div>
+      </div>
+    </div>
+<div class="contact-right reveal">
+  <form class="contact-form" 
+        action="https://api.web3forms.com/submit" 
+        method="POST">
+
+    <!-- Web3Forms Access Key -->
+    <input type="hidden" name="access_key" value="570a09ae-0c65-4f53-a357-43e8786aaf1f">
+
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" name="name" placeholder="Your full name" required>
+    </div>
+
+    <div class="form-group">
+      <label>Organisation</label>
+      <input type="text" name="organisation" placeholder="Airline / Lessor / MRO / Bank" required>
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" name="email" placeholder="your@organisation.com" required>
+    </div>
+
+    <div class="form-group">
+      <label>Enquiry Type</label>
+      <select name="enquiry_type">
+        <option>Pilot Transition Audit (Free)</option>
+        <option>SaaS Platform Demo</option>
+        <option>Enterprise / Custom Pricing</option>
+        <option>Hangar Edge Hub Deployment</option>
+        <option>API / SDK Licensing</option>
+        <option>Investor / Partnership Enquiry</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Fleet or Asset Details</label>
+      <textarea name="message" placeholder="Brief description of your aircraft..." maxlength="500"></textarea>
+      <div class="char-count">0 / 500</div>
+    </div>
+
+    <button type="submit" class="form-submit">
+      Submit Enquiry →
+    </button>
+
+  </form>
+
+  <div class="form-success" id="formSuccess" style="display:none;">
+    ✅ Enquiry received. Our team will contact you within 24 hours.
+  </div>
+</div>
+</section>
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="footer-grid">
+
+    <div class="footer-brand">
+      <div class="logo-wrap">
+        <span class="logo-text">ZATO<span>-AeroGuard</span></span>
+      </div>
+      <p>
+        The world's first AI-powered Transactional Digital Twin for aircraft ownership migration. Transition. Diversify. Grow. UK-built, globally scalable.
+      </p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="#services">Intelligence Engines</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#pricing">Pricing Tiers</a>
+      <a href="#roadmap">Roadmap</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#about">About &amp; Founder</a>
+      <a href="#faq">FAQ</a>
+      <a href="#contact">Contact</a>
+      <a href="#">Privacy Policy</a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2026 <span>ZATO-AeroGuard</span> · Asset Transition Ltd. · All rights reserved.</p>
+    <p>Founder &amp; CEO <span>Ronak Mistry</span> · Transition. Diversify. Grow.</p>
+  </div>
+</footer>
+
+<!-- ===================== ADVANCED SCRIPTS ===================== -->
+<script>
+
+/* ══════════════════════════════════════════════
+   PAGE LOADER
+══════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('page-loader').classList.add('hide');
+  }, 1400);
+});
+
+/* ══════════════════════════════════════════════
+   CUSTOM CURSOR
+══════════════════════════════════════════════ */
+const ring = document.getElementById('cursor-ring');
+const dot  = document.getElementById('cursor-dot');
+let  mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left  = mx + 'px';
+  dot.style.top   = my + 'px';
+});
+
+function animateCursor() {
+  rx += (mx - rx) * 0.14;
+  ry += (my - ry) * 0.14;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+document.querySelectorAll('a,button,.feature-tag,.faq-question,.price-card,.platform-card').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('cursor-hover'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('cursor-hover'));
+});
+
+/* ══════════════════════════════════════════════
+   UTC CLOCK
+══════════════════════════════════════════════ */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2,'0');
+  const m = String(now.getUTCMinutes()).padStart(2,'0');
+  const s = String(now.getUTCSeconds()).padStart(2,'0');
+  document.getElementById('utc-clock').textContent = `UTC ${h}:${m}:${s}`;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ══════════════════════════════════════════════
+   NAVBAR SCROLL SHRINK + ACTIVE NAV
+══════════════════════════════════════════════ */
+const navbar = document.getElementById('navbar');
+const sections = document.querySelectorAll('section[id]');
+
+window.addEventListener('scroll', () => {
+  /* Shrink navbar */
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+
+  /* Progress bar */
+  const total = document.body.scrollHeight - window.innerHeight;
+  document.getElementById('progress-bar').style.width = (window.scrollY / total * 100) + '%';
+
+  /* Back to top */
+  document.getElementById('back-top').classList.toggle('show', window.scrollY > 500);
+
+  /* Active nav highlight */
+  let current = '';
+  sections.forEach(sec => {
+    if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+  });
+  document.querySelectorAll('#navMenu a').forEach(a => {
+    a.classList.toggle('nav-active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+/* ══════════════════════════════════════════════
+   NAVBAR HAMBURGER
+══════════════════════════════════════════════ */
+const toggle = document.getElementById('menuToggle');
+const menu   = document.getElementById('navMenu');
+toggle.addEventListener('click', () => {
+  menu.classList.toggle('active');
+  const spans = toggle.querySelectorAll('span');
+  if (menu.classList.contains('active')) {
+    spans[0].style.transform = 'rotate(45deg) translate(5px,5px)';
+    spans[1].style.opacity   = '0';
+    spans[2].style.transform = 'rotate(-45deg) translate(5px,-5px)';
+  } else {
+    spans[0].style.transform = '';
+    spans[1].style.opacity   = '';
+    spans[2].style.transform = '';
+  }
+});
+document.querySelectorAll('#navMenu a').forEach(link => {
+  link.addEventListener('click', () => {
+    menu.classList.remove('active');
+    const spans = toggle.querySelectorAll('span');
+    spans[0].style.transform = ''; spans[1].style.opacity = ''; spans[2].style.transform = '';
+  });
+});
+
+/* Smooth scroll removed  instant navigation */
+
+/* ══════════════════════════════════════════════
+   BACK TO TOP
+══════════════════════════════════════════════ */
+document.getElementById('back-top').addEventListener('click', () =>
+  window.scrollTo({top:0,behavior:'smooth'})
+);
+
+/* ══════════════════════════════════════════════
+   FAQ ACCORDION
+══════════════════════════════════════════════ */
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+/* ══════════════════════════════════════════════
+   SERVICE CARD EXPAND
+══════════════════════════════════════════════ */
+function toggleCard(id, btn) {
+  const card = document.getElementById(id);
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.platform-card').forEach(c => {
+    c.classList.remove('open');
+    const b = c.querySelector('.learn-btn');
+    if (b) b.textContent = 'Learn More';
+  });
+  if (!isOpen) { card.classList.add('open'); btn.textContent = 'Show Less'; }
+}
+
+/* ══════════════════════════════════════════════
+   HERO TYPING WORD CYCLE
+══════════════════════════════════════════════ */
+const words = ['Transition.','Orchestration.','Liquidity.','Intelligence.','Migration.'];
+let wi = 0;
+const wordEl = document.getElementById('hero-word');
+function cycleWord() {
+  wordEl.style.opacity = '0';
+  setTimeout(() => {
+    wi = (wi + 1) % words.length;
+    wordEl.textContent = words[wi];
+    wordEl.style.opacity = '1';
+    wordEl.style.transition = 'opacity 0.5s';
+  }, 400);
+}
+setInterval(cycleWord, 2800);
+
+/* ══════════════════════════════════════════════
+   PARTICLE CANVAS
+══════════════════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('particle-canvas');
+  const ctx    = canvas.getContext('2d');
+  let   pts    = [], W, H;
+  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  function P() {
+    this.x = Math.random()*W; this.y = Math.random()*H;
+    this.r = Math.random()*1.8+0.4;
+    this.vx = (Math.random()-0.5)*0.38; this.vy = (Math.random()-0.5)*0.38;
+    this.life = Math.random();
+  }
+  for (let i=0;i<80;i++) pts.push(new P());
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    pts.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.life+=0.004;
+      if(p.x<0||p.x>W||p.y<0||p.y>H){p.x=Math.random()*W;p.y=Math.random()*H;}
+      const a = (Math.sin(p.life)*0.5+0.5)*0.65;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(200,146,42,${a})`; ctx.fill();
+    });
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<110){
+          ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y);
+          ctx.strokeStyle=`rgba(200,146,42,${0.09*(1-d/110)})`; ctx.lineWidth=0.5; ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══════════════════════════════════════════════
+   3D TILT HERO CARD
+══════════════════════════════════════════════ */
+const heroCard = document.getElementById('heroCard');
+if (heroCard) {
+  heroCard.addEventListener('mousemove', e => {
+    const rect = heroCard.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width  - 0.5;
+    const y = (e.clientY - rect.top)  / rect.height - 0.5;
+    heroCard.style.transform = `perspective(800px) rotateY(${x*12}deg) rotateX(${-y*10}deg) scale(1.02)`;
+    document.getElementById('cardShine').style.background =
+      `radial-gradient(400px circle at ${e.clientX - rect.left}px ${e.clientY - rect.top}px, rgba(200,146,42,0.1), transparent 50%)`;
+  });
+  heroCard.addEventListener('mouseleave', () => {
+    heroCard.style.transform = '';
+    document.getElementById('cardShine').style.background = '';
+  });
+}
+
+/* ══════════════════════════════════════════════
+   PLATFORM CARD SHINE (mouse-follow)
+══════════════════════════════════════════════ */
+document.querySelectorAll('.platform-card').forEach(card => {
+  const shine = card.querySelector('.platform-card-shine');
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    if (shine) shine.style.background =
+      `radial-gradient(500px circle at ${x}px ${y}px, rgba(200,146,42,0.1), transparent 40%)`;
+    /* Subtle 3D tilt */
+    const cx = (x/r.width - 0.5)*8, cy = (y/r.height - 0.5)*6;
+    card.style.transform = `perspective(700px) rotateY(${cx}deg) rotateX(${-cy}deg) translateY(-8px)`;
+  });
+  card.addEventListener('mouseleave', () => {
+    if (shine) shine.style.background = '';
+    card.style.transform = '';
+  });
+});
+
+/* ══════════════════════════════════════════════
+   SCROLL REVEAL  (standard + stagger)
+══════════════════════════════════════════════ */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObs.unobserve(e.target);
+    }
+  });
+}, {threshold:0.1});
+document.querySelectorAll('.reveal,.stagger,.timeline-card').forEach(el => revealObs.observe(el));
+
+/* ══════════════════════════════════════════════
+   ANIMATED COUNTERS (odometer style)
+══════════════════════════════════════════════ */
+function animateCounter(el, target, suffix) {
+  let v = 0;
+  const dur = 2000, step = 16;
+  const inc = target / (dur/step);
+  const t = setInterval(() => {
+    v += inc;
+    if (v >= target) { v = target; clearInterval(t); }
+    el.textContent = Math.floor(v) + (suffix || '');
+  }, step);
+}
+
+const cntObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      const el = e.target.querySelector('[data-target]');
+      if (el) animateCounter(el, parseFloat(el.dataset.target), el.dataset.suffix || '');
+      cntObs.unobserve(e.target);
+    }
+  });
+}, {threshold:0.4});
+document.querySelectorAll('.stat-item[data-tip]').forEach(el => cntObs.observe(el));
+
+/* ══════════════════════════════════════════════
+   RADIAL GAUGE ANIMATION
+══════════════════════════════════════════════ */
+const gaugeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      animateGauge();
+      animateBars();
+      gaugeObs.unobserve(e.target);
+    }
+  });
+}, {threshold:0.3});
+const gaugeSection = document.querySelector('.gauge-section');
+if (gaugeSection) gaugeObs.observe(gaugeSection);
+
+function animateGauge() {
+  const fill   = document.getElementById('gaugeFill');
+  const pctEl  = document.getElementById('gaugePct');
+  const r      = 90;
+  const circ   = 2 * Math.PI * r; // ≈565
+  const target = 94; // 94% readiness
+  const offset = circ - (circ * target / 100);
+  let   cur    = 0;
+  const dur    = 2000, step = 16, inc = target / (dur/step);
+  const t = setInterval(() => {
+    cur += inc;
+    if (cur >= target) { cur = target; clearInterval(t); }
+    const off = circ - (circ * cur / 100);
+    fill.style.strokeDashoffset = off;
+    pctEl.textContent = Math.floor(cur) + '%';
+  }, step);
+}
+
+function animateBars() {
+  document.querySelectorAll('.gauge-bar-fill[data-width]').forEach((bar, i) => {
+    setTimeout(() => {
+      bar.style.width = bar.dataset.width + '%';
+    }, i * 150);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   BILLING TOGGLE (annual/monthly)
+══════════════════════════════════════════════ */
+let isAnnual = false;
+const prices = {
+  monthly:  ['£1,013', '£2,835', 'Custom'],
+  annual:   ['£810',   '£2,268', 'Custom'],
+  mUnit:    ['per month · up to 5 narrow-body assets', 'per month · up to 25 assets', 'avg. £12,150+/month · unlimited assets'],
+  aUnit:    ['per month billed annually · up to 5 assets', 'per month billed annually · up to 25 assets', 'avg. £9,720+/month billed annually · unlimited assets'],
+};
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const sw = document.getElementById('toggleSwitch');
+  sw.classList.toggle('on', isAnnual);
+  document.getElementById('monthlyLabel').classList.toggle('active', !isAnnual);
+  document.getElementById('annualLabel').classList.toggle('active', isAnnual);
+  document.getElementById('saveBadge').style.opacity = isAnnual ? '1' : '0.4';
+  [1,2,3].forEach(i => {
+    const el = document.getElementById('price'+i);
+    const uel= document.getElementById('unit'+i);
+    el.style.opacity = '0';
+    setTimeout(() => {
+      el.textContent  = isAnnual ? prices.annual[i-1]  : prices.monthly[i-1];
+      uel.textContent = isAnnual ? prices.aUnit[i-1]   : prices.mUnit[i-1];
+      el.style.opacity = '1';
+      el.style.transition = 'opacity 0.35s';
+    }, 180);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   TEXTAREA CHAR COUNTER
+══════════════════════════════════════════════ */
+const msgEl = document.getElementById('f-msg');
+const ccEl  = document.getElementById('charCount');
+if (msgEl) {
+  msgEl.addEventListener('input', () => {
+    const len = msgEl.value.length;
+    ccEl.textContent = len + ' / 500';
+    ccEl.classList.toggle('warn', len > 400);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   CONTACT FORM SUBMIT
+══════════════════════════════════════════════ */
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = document.getElementById('formBtn');
+  btn.textContent = 'Sending…'; btn.style.opacity = '0.7'; btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('contactForm').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
+  }, 1200);
+}
+
+/* ══════════════════════════════════════════════
+   PARALLAX DEPTH ON HERO ORBS
+══════════════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+  const sy = window.scrollY;
+  document.querySelectorAll('.orb').forEach((orb, i) => {
+    const speed = [0.15, 0.22, 0.3][i] || 0.15;
+    orb.style.transform = `translateY(${sy * speed}px)`;
+  });
+  document.querySelector('.hero-glow').style.transform =
+    `translate(-50%,calc(-50% + ${sy * 0.1}px))`;
+});
+
+/* ══════════════════════════════════════════════
+   AIRCRAFT FLIGHT PATH ANIMATION (JS-driven textPath offset)
+══════════════════════════════════════════════ */
+(function() {
+  const aircraft = document.getElementById('aircraft-icon');
+  if (!aircraft) return;
+  let offset = 0;
+  function flyAircraft() {
+    offset = (offset + 0.2) % 100;
+    // We move the textPath startOffset
+    const tp = aircraft.closest ? aircraft.closest('textPath') : aircraft.parentElement;
+    if (tp) tp.setAttribute('startOffset', offset + '%');
+    requestAnimationFrame(flyAircraft);
+  }
+  flyAircraft();
+})();
+
+/* ══════════════════════════════════════════════
+   HOVER RIPPLE on BUTTONS
+══════════════════════════════════════════════ */
+document.querySelectorAll('.btn-gold,.btn-outline-gold,.form-submit,.price-btn,.learn-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    const rect = this.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    ripple.style.cssText = `
+      position:absolute;border-radius:50%;background:rgba(255,255,255,0.25);
+      width:${size}px;height:${size}px;
+      top:${e.clientY-rect.top-size/2}px;left:${e.clientX-rect.left-size/2}px;
+      transform:scale(0);animation:ripple-go 0.5s ease-out forwards;pointer-events:none;
+    `;
+    if (!this.style.position || this.style.position === 'static') this.style.position = 'relative';
+    this.style.overflow = 'hidden';
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+  });
+});
+/* Ripple keyframe */
+const rs = document.createElement('style');
+rs.textContent = '@keyframes ripple-go{to{transform:scale(2.5);opacity:0;}}';
+document.head.appendChild(rs);
+
+</script>
+</body>
+</html>
